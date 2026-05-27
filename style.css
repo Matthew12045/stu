@@ -1,0 +1,265 @@
+/* ═══════════════════════════════════════════════════════════════
+   M2 Ball Launcher — Shared Stylesheet
+   Style: light theme matching the original NE555 knob calculator
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.page-wrap {
+  max-width: 680px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Shared card ──────────────────────────────────────────────── */
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 2rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.n-chip {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7280;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  padding: 3px 8px;
+  margin-bottom: 10px;
+}
+
+.n-h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.n-h1 span { color: #3b82f6; }
+.n-h1 .accent-green { color: #22c55e; }
+
+.n-sub {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Inputs ───────────────────────────────────────────────────── */
+.n-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.n-input-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.n-input-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.n-input-label .subtle {
+  color: #9ca3af;
+  font-size: 9px;
+}
+.n-input {
+  background: #f9fafb;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 8px;
+  color: #111827;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 10px 12px;
+  outline: none;
+  width: 100%;
+  -moz-appearance: textfield;
+  transition: border-color 0.2s, background 0.2s;
+}
+.n-input::-webkit-outer-spin-button,
+.n-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.n-input:focus { border-color: #3b82f6; background: #fff; }
+.n-input::placeholder { color: #9ca3af; font-weight: 400; }
+
+.n-err {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #ef4444;
+  min-height: 16px;
+  margin-bottom: 0.5rem;
+}
+
+/* ─── Output grid (knobs, switch, etc.) ────────────────────────── */
+.n-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.n-card {
+  background: #f9fafb;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 12px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.n-clabel {
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.n-icon {
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+}
+.n-cval {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #4b5563;
+  transition: color 0.2s;
+}
+.n-cval.purple { color: #8b5cf6; }
+.n-cval.blue   { color: #3b82f6; }
+.n-cval.amber  { color: #f59e0b; }
+.n-cval.green  { color: #22c55e; }
+.n-csub {
+  font-size: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ─── Switch toggle ────────────────────────────────────────────── */
+.n-sw-track {
+  width: 42px; height: 22px;
+  border-radius: 11px;
+  background: #e5e7eb;
+  border: 1px solid rgba(0,0,0,0.15);
+  display: flex; align-items: center;
+  padding: 0 3px;
+  transition: background 0.3s, border-color 0.3s;
+}
+.n-sw-track.on {
+  background: rgba(34,197,94,0.2);
+  border-color: rgba(34,197,94,0.4);
+}
+.n-sw-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #9ca3af;
+  transition: transform 0.3s, background 0.3s;
+}
+.n-sw-track.on .n-sw-dot {
+  transform: translateX(20px);
+  background: #22c55e;
+}
+
+/* ─── Formula block ────────────────────────────────────────────── */
+.n-formula {
+  background: #f9fafb;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 2;
+  color: #4b5563;
+  display: none;
+  margin-bottom: 1rem;
+}
+.n-formula.show { display: block; }
+.n-formula .hl  { color: #111827; font-weight: 700; }
+.n-formula .blu { color: #3b82f6; }
+.n-formula .grn { color: #22c55e; }
+.n-formula .prp { color: #8b5cf6; }
+
+.n-footer {
+  font-size: 10px;
+  color: #6b7280;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: center;
+}
+
+/* ─── Regression result cards ──────────────────────────────────── */
+.reg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.reg-result {
+  background: #f9fafb;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.reg-big {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: #8b5cf6;
+  margin: 6px 0 4px;
+}
+.reg-unit {
+  font-size: 10px;
+  color: #6b7280;
+  font-family: 'JetBrains Mono', monospace;
+}
+.reg-eq {
+  background: #f9fafb;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+.reg-eq .hl  { color: #111827; font-weight: 700; }
+.reg-eq .prp { color: #8b5cf6; }
+.reg-eq .grn { color: #22c55e; }
+
+.reg-warn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #f59e0b;
+  min-height: 14px;
+  margin-top: 4px;
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M2 Ball Launcher — Delay & Draw Length Calculator</title>
+<meta name="description" content="Combined delay-time calculator (NE555 timer) and draw-length regression estimator for the M2 Ball Launcher project.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- ═══════════════ SHARED INPUTS ═══════════════ -->
+  <div class="card" id="input-card">
+    <div class="n-chip">M2 Ball Launcher</div>
+    <div class="n-h1">Delay & <span>Timer</span> + Draw <span class="accent-green">Length</span></div>
+    <div class="n-sub" id="model-sub">Loading dataset…</div>
+
+    <div class="n-inputs">
+      <div class="n-input-col">
+        <div class="n-input-label">Sx (mm) <span class="subtle">landing</span></div>
+        <input class="n-input" type="number" id="in-sx" placeholder="e.g. 2292" />
+      </div>
+      <div class="n-input-col">
+        <div class="n-input-label">Motor (RPM)</div>
+        <input class="n-input" type="number" id="in-rpm" placeholder="e.g. 9" />
+      </div>
+      <div class="n-input-col">
+        <div class="n-input-label">Phi (deg)</div>
+        <input class="n-input" type="number" id="in-phi" placeholder="e.g. 270" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DELAY CALCULATOR OUTPUT ═══════════════ -->
+  <div class="card" id="delay-card">
+    <div class="n-chip">Delay Calculator</div>
+    <div class="n-err" id="nb-err"></div>
+
+    <div class="n-grid">
+      <div class="n-card">
+        <div class="n-clabel">Target Delay</div>
+        <div class="n-icon">
+          <svg width="26" height="26" fill="none" stroke="#8b5cf6" stroke-width="1.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+          </svg>
+        </div>
+        <div class="n-cval purple" id="nb-vt">&ndash;</div>
+        <div class="n-csub">seconds</div>
+      </div>
+
+      <div class="n-card">
+        <div class="n-clabel">Knob 1</div>
+        <div class="n-icon">
+          <svg width="62" height="62" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#e5e7eb" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="163 24" stroke-dashoffset="-12"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#3b82f6" stroke-width="8"
+              stroke-linecap="round" id="nb-a1" stroke-dasharray="0 187" stroke-dashoffset="-12"/>
+            <text x="40" y="45" text-anchor="middle" font-size="20" font-weight="700"
+              font-family="JetBrains Mono,monospace" fill="#3b82f6" id="nb-d1">&ndash;</text>
+          </svg>
+        </div>
+        <div class="n-cval blue" id="nb-k1">&ndash;</div>
+        <div class="n-csub">pos 0&ndash;9</div>
+      </div>
+
+      <div class="n-card">
+        <div class="n-clabel">Knob 2</div>
+        <div class="n-icon">
+          <svg width="62" height="62" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#e5e7eb" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="163 24" stroke-dashoffset="-12"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#f59e0b" stroke-width="8"
+              stroke-linecap="round" id="nb-a2" stroke-dasharray="0 187" stroke-dashoffset="-12"/>
+            <text x="40" y="45" text-anchor="middle" font-size="20" font-weight="700"
+              font-family="JetBrains Mono,monospace" fill="#f59e0b" id="nb-d2">&ndash;</text>
+          </svg>
+        </div>
+        <div class="n-cval amber" id="nb-k2">&ndash;</div>
+        <div class="n-csub">pos 0&ndash;9</div>
+      </div>
+
+      <div class="n-card">
+        <div class="n-clabel">Switch</div>
+        <div class="n-icon">
+          <div class="n-sw-track" id="nb-sw"><div class="n-sw-dot"></div></div>
+        </div>
+        <div class="n-cval" id="nb-sv">&ndash;</div>
+        <div class="n-csub" id="nb-sl">&ndash;</div>
+      </div>
+    </div>
+
+    <div class="n-formula" id="nb-fm">
+      <div id="nb-f0"></div>
+      <div id="nb-f1"></div>
+      <div id="nb-f2"></div>
+      <div id="nb-f3"></div>
+    </div>
+
+    <div class="n-footer">
+      Sx used for delay = Sx + 102 mm &nbsp;&middot;&nbsp;
+      Limit: 0.1 s min &nbsp;&middot;&nbsp;
+      <span style="color:#22c55e">&#9632;</span> recorded &nbsp;
+      <span style="color:#3b82f6">&#9632;</span> regression
+    </div>
+  </div>
+
+  <!-- ═══════════════ DRAW LENGTH REGRESSION OUTPUT ═══════════════ -->
+  <div class="card" id="reg-card">
+    <div class="n-chip">Draw Length Estimator</div>
+    <div class="n-sub" id="reg-sub">OLS natural direction + algebraic inversion &middot; linear model</div>
+
+    <div class="reg-grid">
+      <div class="reg-result">
+        <div class="n-clabel">Estimated Draw Length</div>
+        <div class="reg-big" id="reg-L">&ndash;</div>
+        <div class="reg-unit">mm</div>
+      </div>
+      <div class="reg-result">
+        <div class="n-clabel">Input Landing Sx</div>
+        <div class="reg-big" id="reg-Sx" style="color:#3b82f6">&ndash;</div>
+        <div class="reg-unit">mm</div>
+      </div>
+    </div>
+
+    <div class="reg-eq" id="reg-eq">
+      Enter Sx above to see the regression equation and result.
+    </div>
+    <div class="reg-warn" id="reg-warn"></div>
+
+    <div class="n-footer">
+      Calibration: L = 105–130 mm &nbsp;&middot;&nbsp;
+      Sx = 1548–2200 mm &nbsp;&middot;&nbsp;
+      n = 6 data points
+    </div>
+  </div>
+
+</div>
+
+<!-- Entry point: ES6 module import -->
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>
