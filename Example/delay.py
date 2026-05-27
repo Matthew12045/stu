@@ -1,4 +1,4 @@
-﻿import pandas as pd
+import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import json
@@ -419,7 +419,7 @@ def integrated_calculator(csv_filename="ne555_full_dataset.csv"):
     }}
 
     if (t_delay < 0.1) {{
-      err.textContent = `Calculated delay (${{t_delay.toFixed(2)}}s) is still below 0.1s after adding 2Ï€.`;
+      err.textContent = `Calculated delay (${{t_delay.toFixed(2)}}s) is still below 0.1s after adding 2π.`;
       nb_reset(false);
       return;
     }}
@@ -464,7 +464,7 @@ def integrated_calculator(csv_filename="ne555_full_dataset.csv"):
       sw.classList.remove('on');
       sv.textContent   = 'OFF';
       sv.style.color   = '#6b7280';
-      document.getElementById('nb-sl').textContent = '0â€“9.9 s';
+      document.getElementById('nb-sl').textContent = '0–9.9 s';
     }}
 
     const fm = document.getElementById('nb-fm');
@@ -483,10 +483,10 @@ def integrated_calculator(csv_filename="ne555_full_dataset.csv"):
     document.getElementById('nb-f1').innerHTML = isRec
       ? 'Best step = ' + hl(step.toFixed(1) + ' s') + '  &rarr;  NE555 output = ' +
         grn(mean.toFixed(4) + ' s') + ' ' + grn('(recorded)') +
-        ' Â± ' + std.toFixed(4) + ' s std' +
+        ' ± ' + std.toFixed(4) + ' s std' +
         '  &nbsp;|&nbsp;  error = ' + hl(error + ' s')
       : 'Best step = ' + hl(step.toFixed(1) + ' s') + '  &rarr;  NE555 output = ' +
-        blu(SLOPE) + ' Ã— ' + hl(step.toFixed(1)) + ' + ' + blu(INTERCEPT) +
+        blu(SLOPE) + ' × ' + hl(step.toFixed(1)) + ' + ' + blu(INTERCEPT) +
         ' = ' + blu(mean.toFixed(4) + ' s') +
         '  &nbsp;|&nbsp;  error = ' + hl(error + ' s');
 
@@ -502,12 +502,12 @@ def integrated_calculator(csv_filename="ne555_full_dataset.csv"):
   }};
 
   window.nb_reset = function(clearErr = true) {{
-    ['nb-vt','nb-k1','nb-k2'].forEach(id => document.getElementById(id).textContent = 'â€“');
-    ['nb-d1','nb-d2'].forEach(id => document.getElementById(id).textContent = 'â€“');
+    ['nb-vt','nb-k1','nb-k2'].forEach(id => document.getElementById(id).textContent = '–');
+    ['nb-d1','nb-d2'].forEach(id => document.getElementById(id).textContent = '–');
     ['nb-a1','nb-a2'].forEach(id => arc(id, 0));
-    document.getElementById('nb-sv').textContent  = 'â€“';
+    document.getElementById('nb-sv').textContent  = '–';
     document.getElementById('nb-sv').style.color  = '#6b7280';
-    document.getElementById('nb-sl').textContent  = 'â€“';
+    document.getElementById('nb-sl').textContent  = '–';
     document.getElementById('nb-sw').classList.remove('on');
     document.getElementById('nb-fm').classList.remove('show');
     if (clearErr) document.getElementById('nb-err').textContent = '';

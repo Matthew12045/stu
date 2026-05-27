@@ -1,4 +1,4 @@
-﻿# â”€â”€ Cell 4: Interactive UI â€” full draw length analysis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Cell 4: Interactive UI — full draw length analysis ───────────────────────
 import numpy as np
 import matplotlib.pyplot as plt
 import ipywidgets as widgets
@@ -6,7 +6,7 @@ from IPython.display import display
 mean_xbar_pooled = [1548.07, 1657.67, 1783.74, 1946.85, 2067.23, 2199.73]
 mean_rbar_pooled = [1548.10, 1657.70, 1783.80, 1946.90, 2067.30, 2199.70]
 sigmax_pooled = [15.67, 17.58, 42.59, 35.89, 43.36, 36.25]
-# â”€â”€ Experimental data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Experimental data ────────────────────────────────────────────────────────
 L       = np.array([105, 110, 115, 120, 125, 130])
 Sx_mean = np.array([1548.07, 1657.67, 1783.74, 1946.85, 2067.23, 2199.73])
 sigma_Sx = np.array([15.67, 17.58, 42.59, 35.89, 43.36, 36.25])
@@ -14,7 +14,7 @@ sigma_Sx = np.array([15.67, 17.58, 42.59, 35.89, 43.36, 36.25])
 Sx_MIN, Sx_MAX = Sx_mean.min(), Sx_mean.max()
 L_MIN,  L_MAX  = L.min(), L.max()
 
-# â”€â”€ Fits â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Fits ─────────────────────────────────────────────────────────────────────
 # Direct inverse: L = f(Sx)
 p_lin_direct  = np.polyfit(Sx_mean, L, 1)
 p_quad_direct = np.polyfit(Sx_mean, L, 2)
@@ -26,7 +26,7 @@ p_quad_nat = np.polyfit(L, Sx_mean, 2)
 a1, b1 = p_lin_nat
 a2, b2, c2 = p_quad_nat
 
-# â”€â”€ Inversion functions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Inversion functions ──────────────────────────────────────────────────────
 def invert_linear(Sx):
     return (Sx - b1) / a1
 
@@ -38,7 +38,7 @@ def invert_quadratic(Sx):
 
     return (-b2 + np.sqrt(disc)) / (2 * a2)
 
-# â”€â”€ Metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Metrics ──────────────────────────────────────────────────────────────────
 def metrics(L_true, L_pred):
     L_true = np.asarray(L_true)
     L_pred = np.asarray(L_pred)
@@ -51,7 +51,7 @@ def metrics(L_true, L_pred):
 
     return rmse, r2
 
-# â”€â”€ Theme colors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Theme colors ─────────────────────────────────────────────────────────────
 DARK   = "#0f1117"
 PANEL  = "#1c1f2e"
 BORDER = "#2e3250"
@@ -70,7 +70,7 @@ def styled(desc, val, unit=""):
         f"<span style='color:{MUTED};font-size:11px'> {unit}</span>"
     )
 
-# â”€â”€ CSS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── CSS ──────────────────────────────────────────────────────────────────────
 custom_css = widgets.HTML(f"""
 <style>
     .m2-dark-ui {{ background-color: {DARK} !important; }}
@@ -108,7 +108,7 @@ custom_css = widgets.HTML(f"""
 </style>
 """)
 
-# â”€â”€ Title â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Title ────────────────────────────────────────────────────────────────────
 title = widgets.HTML(f"""
 <div style='background:{DARK};padding:18px 24px 10px;border-bottom:2px solid {BORDER}'>
   <div style='color:{CYAN};font-family:monospace;font-size:11px;letter-spacing:3px;
@@ -116,25 +116,25 @@ title = widgets.HTML(f"""
   <div style='color:{WHITE};font-size:22px;font-weight:700;font-family:monospace'>
     Draw Length Estimator</div>
   <div style='color:{MUTED};font-size:12px;margin-top:4px'>
-    OLS fit with algebraic inversion &nbsp;Â·&nbsp;
-    n = {len(L)} draw lengths &nbsp;Â·&nbsp;
-    range {int(L.min())}â€“{int(L.max())} mm</div>
+    OLS fit with algebraic inversion &nbsp;·&nbsp;
+    n = {len(L)} draw lengths &nbsp;·&nbsp;
+    range {int(L.min())}–{int(L.max())} mm</div>
 </div>
 """)
 
-# â”€â”€ Method toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Method toggle ────────────────────────────────────────────────────────────
 model_toggle = widgets.ToggleButtons(
     options=[
         ("Direct inverse fit",   "direct"),
         ("OLS natural + invert", "natural"),
-        ("Forward  L â†’ Sx",      "forward"),
+        ("Forward  L → Sx",      "forward"),
     ],
     value="natural",
     style={"button_width": "220px", "description_width": "0px"},
     layout=widgets.Layout(margin="12px 0 0 0"),
 )
 
-# â”€â”€ Inverse input: Sx â†’ L â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Inverse input: Sx → L ────────────────────────────────────────────────────
 Sx_input = widgets.BoundedFloatText(
     value=1601.2,
     min=500,
@@ -167,7 +167,7 @@ for btn, v in zip(quick_btns, Sx_mean):
 
     btn.on_click(_mk(v))
 
-# â”€â”€ Forward input: L â†’ Sx â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Forward input: L → Sx ────────────────────────────────────────────────────
 L_input = widgets.BoundedFloatText(
     value=100.0,
     min=50,
@@ -200,7 +200,7 @@ for btn, v in zip(L_quick_btns, L):
 
     btn.on_click(_mkL(v))
 
-# â”€â”€ Output areas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Output areas ─────────────────────────────────────────────────────────────
 input_box   = widgets.VBox([])
 result_out  = widgets.Output()
 metrics_out = widgets.Output()
@@ -210,12 +210,12 @@ section_header = widgets.HTML("")
 
 def _section_html(mode):
     if mode == "forward":
-        label = "FORWARD PREDICTION  Â·  L â†’ Sx"
-        desc  = "Input draw length L â†’ predict landing Sx directly"
+        label = "FORWARD PREDICTION  ·  L → Sx"
+        desc  = "Input draw length L → predict landing Sx directly"
         col   = PURPLE
     else:
-        label = "INVERSE PREDICTION  Â·  Sx â†’ L"
-        desc  = "Input landing Sx â†’ estimate draw length L"
+        label = "INVERSE PREDICTION  ·  Sx → L"
+        desc  = "Input landing Sx → estimate draw length L"
         col   = CYAN
 
     return (
@@ -225,7 +225,7 @@ def _section_html(mode):
         f"<div style='color:{MUTED};font-size:12px'>{desc}</div></div>"
     )
 
-# â”€â”€ Metrics panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Metrics panel ────────────────────────────────────────────────────────────
 def render_metrics(mode):
     metrics_out.clear_output(wait=True)
 
@@ -240,15 +240,15 @@ def render_metrics(mode):
             r2_f1 = 1 - np.sum((Sx_mean - sx_lin_rec)**2) / np.sum((Sx_mean - Sx_mean.mean())**2)
             r2_f2 = 1 - np.sum((Sx_mean - sx_quad_rec)**2) / np.sum((Sx_mean - Sx_mean.mean())**2)
 
-            eq_lin = f"Sx = {a1:.6f}Â·L {'+' if b1 >= 0 else ''}{b1:.4f}"
+            eq_lin = f"Sx = {a1:.6f}·L {'+' if b1 >= 0 else ''}{b1:.4f}"
             eq_quad = (
-                f"Sx = {a2:.8f}Â·LÂ² "
-                f"{'+' if b2 >= 0 else ''}{b2:.6f}Â·L "
+                f"Sx = {a2:.8f}·L² "
+                f"{'+' if b2 >= 0 else ''}{b2:.6f}·L "
                 f"{'+' if c2 >= 0 else ''}{c2:.4f}"
             )
 
             rm1, rm2, r1, r2_ = rmse_f1, rmse_f2, r2_f1, r2_f2
-            note, note_col = "OLS natural direction â€” L is error-free, Sx carries noise âœ“", GREEN
+            note, note_col = "OLS natural direction — L is error-free, Sx carries noise ✓", GREEN
 
         elif mode == "direct":
             l_lin_rec  = np.polyval(p_lin_direct, Sx_mean)
@@ -258,17 +258,17 @@ def render_metrics(mode):
             rmse_d2, r2_d2 = metrics(L, l_quad_rec)
 
             eq_lin = (
-                f"L = {p_lin_direct[0]:.6f}Â·Sx "
+                f"L = {p_lin_direct[0]:.6f}·Sx "
                 f"{'+' if p_lin_direct[1] >= 0 else ''}{p_lin_direct[1]:.4f}"
             )
             eq_quad = (
-                f"L = {p_quad_direct[0]:.8f}Â·SxÂ² "
-                f"{'+' if p_quad_direct[1] >= 0 else ''}{p_quad_direct[1]:.6f}Â·Sx "
+                f"L = {p_quad_direct[0]:.8f}·Sx² "
+                f"{'+' if p_quad_direct[1] >= 0 else ''}{p_quad_direct[1]:.6f}·Sx "
                 f"{'+' if p_quad_direct[2] >= 0 else ''}{p_quad_direct[2]:.4f}"
             )
 
             rm1, rm2, r1, r2_ = rmse_d1, rmse_d2, r2_d1, r2_d2
-            note, note_col = "Direct polyfit(Sx, L) â€” treats noisy Sx as error-free", ORANGE
+            note, note_col = "Direct polyfit(Sx, L) — treats noisy Sx as error-free", ORANGE
 
         else:
             l_lin_rec  = invert_linear(Sx_mean)
@@ -278,17 +278,17 @@ def render_metrics(mode):
             rmse_n2, r2_n2 = metrics(L, l_quad_rec)
 
             eq_lin = (
-                f"Sx = {a1:.6f}Â·L {'+' if b1 >= 0 else ''}{b1:.4f}  "
-                f"â†’  L = (Sx âˆ’ {b1:.2f}) / {a1:.6f}"
+                f"Sx = {a1:.6f}·L {'+' if b1 >= 0 else ''}{b1:.4f}  "
+                f"→  L = (Sx − {b1:.2f}) / {a1:.6f}"
             )
             eq_quad = (
-                f"Sx = {a2:.8f}Â·LÂ² "
-                f"{'+' if b2 >= 0 else ''}{b2:.6f}Â·L "
-                f"{'+' if c2 >= 0 else ''}{c2:.4f}  â†’  quadratic formula"
+                f"Sx = {a2:.8f}·L² "
+                f"{'+' if b2 >= 0 else ''}{b2:.6f}·L "
+                f"{'+' if c2 >= 0 else ''}{c2:.4f}  →  quadratic formula"
             )
 
             rm1, rm2, r1, r2_ = rmse_n1, rmse_n2, r2_n1, r2_n2
-            note, note_col = "OLS natural direction â€” L is error-free, Sx carries noise âœ“", GREEN
+            note, note_col = "OLS natural direction — L is error-free, Sx carries noise ✓", GREEN
 
         display(widgets.HTML(f"""
 <div style='background:{PANEL};border:1px solid {BORDER};border-radius:8px;
@@ -306,16 +306,16 @@ def render_metrics(mode):
 
   <div style='display:flex;gap:32px'>
     <div>{styled('Linear RMSE', f'{rm1:.4f}', 'mm')}</div>
-    <div>{styled('Linear RÂ²',   f'{r1:.8f}')}</div>
+    <div>{styled('Linear R²',   f'{r1:.8f}')}</div>
     <div>{styled('Quad RMSE',   f'{rm2:.4f}', 'mm')}</div>
-    <div>{styled('Quad RÂ²',     f'{r2_:.8f}')}</div>
+    <div>{styled('Quad R²',     f'{r2_:.8f}')}</div>
   </div>
 
   <div style='margin-top:10px;color:{note_col};font-size:11px'>{note}</div>
 </div>
 """))
 
-# â”€â”€ Result card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Result card ──────────────────────────────────────────────────────────────
 def render_result(mode):
     result_out.clear_output(wait=True)
 
@@ -331,7 +331,7 @@ def render_result(mode):
 
             warn = (
                 f"<div style='color:{ORANGE};margin-top:8px;font-size:11px'>"
-                f"âš ï¸ Outside calibrated range [{int(L_MIN)}, {int(L_MAX)}] mm â€” "
+                f"⚠️ Outside calibrated range [{int(L_MIN)}, {int(L_MAX)}] mm — "
                 f"extrapolation only</div>"
                 if Lv < L_MIN or Lv > L_MAX else ""
             )
@@ -339,7 +339,7 @@ def render_result(mode):
             agree = GREEN if delta < 10 else ORANGE if delta < 30 else PINK
 
             header_col = PURPLE
-            header_lbl = "PREDICTION  Â·  L â†’ Sx  (forward, no inversion)"
+            header_lbl = "PREDICTION  ·  L → Sx  (forward, no inversion)"
             input_lbl  = "L ="
             input_val  = f"{Lv:.2f}"
 
@@ -353,10 +353,10 @@ def render_result(mode):
                 f"<div style='color:{MUTED};font-size:11px;margin-bottom:4px'>"
                 f"NEAREST CALIBRATION POINT</div>"
                 f"<div style='color:{CYAN};font-size:16px;font-weight:700'>"
-                f"L={int(L[idx])} mm â†’ {Sx_mean[idx]:.2f} mm</div>"
+                f"L={int(L[idx])} mm → {Sx_mean[idx]:.2f} mm</div>"
                 f"<div style='color:{MUTED};font-size:11px'>"
-                f"Ïƒ = {sigma_Sx[idx]:.2f} mm"
-                f" &nbsp;(Â±2Ïƒ = {2 * sigma_Sx[idx]:.2f} mm)</div></div>"
+                f"σ = {sigma_Sx[idx]:.2f} mm"
+                f" &nbsp;(±2σ = {2 * sigma_Sx[idx]:.2f} mm)</div></div>"
             )
 
             delta_fmt = f"{delta:.2f}"
@@ -375,7 +375,7 @@ def render_result(mode):
 
             warn = (
                 f"<div style='color:{ORANGE};margin-top:8px;font-size:11px'>"
-                f"âš ï¸ Outside calibrated range [{Sx_MIN:.1f}, {Sx_MAX:.1f}] mm â€” "
+                f"⚠️ Outside calibrated range [{Sx_MIN:.1f}, {Sx_MAX:.1f}] mm — "
                 f"extrapolation only</div>"
                 if Sx < Sx_MIN or Sx > Sx_MAX else ""
             )
@@ -383,7 +383,7 @@ def render_result(mode):
             agree = GREEN if delta < 0.5 else ORANGE if delta < 1.5 else PINK
 
             header_col = CYAN
-            header_lbl = "PREDICTION  Â·  Sx â†’ L"
+            header_lbl = "PREDICTION  ·  Sx → L"
             input_lbl  = "Sx ="
             input_val  = f"{Sx:.2f}"
 
@@ -420,7 +420,7 @@ def render_result(mode):
     </div>
 
     <div>
-      <div style='color:{MUTED};font-size:11px;margin-bottom:4px'>Î” MODELS</div>
+      <div style='color:{MUTED};font-size:11px;margin-bottom:4px'>Δ MODELS</div>
       <div style='color:{agree};font-size:22px;font-weight:700'>{delta_fmt}</div>
       <div style='color:{MUTED};font-size:11px'>mm difference</div>
     </div>
@@ -432,7 +432,7 @@ def render_result(mode):
 </div>
 """))
 
-# â”€â”€ Plot renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Plot renderer ────────────────────────────────────────────────────────────
 def render_plot(mode):
     plot_out.clear_output(wait=True)
 
@@ -457,7 +457,7 @@ def render_plot(mode):
             for sp in ax.spines.values():
                 sp.set_color(BORDER)
 
-        # â”€â”€ Mode A: Direct inverse fit, L = f(Sx) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ── Mode A: Direct inverse fit, L = f(Sx) ────────────────────────────
         if mode == "direct":
             l_fine_lin  = np.polyval(p_lin_direct, Sx_fine)
             l_fine_quad = np.polyval(p_quad_direct, Sx_fine)
@@ -474,7 +474,7 @@ def render_plot(mode):
                 ecolor=CYAN + "55",
                 capsize=3,
                 zorder=5,
-                label="Data (Â±2Ïƒ)",
+                label="Data (±2σ)",
             )
 
             ax1.plot(Sx_fine, l_fine_lin, color=PINK, linewidth=1.8, label="Linear")
@@ -493,7 +493,7 @@ def render_plot(mode):
 
             ax1.set_xlabel("Landing Sx (mm)")
             ax1.set_ylabel("Draw Length L (mm)")
-            ax1.set_title("L = f(Sx)  â€”  Direct inverse fit")
+            ax1.set_title("L = f(Sx)  —  Direct inverse fit")
             ax1.set_xlim(Sx_MIN - Sx_pad, Sx_MAX + Sx_pad)
             ax1.set_ylim(L_MIN - L_pad, L_MAX + L_pad)
             ax1.legend(fontsize=8, facecolor=DARK, labelcolor=WHITE, framealpha=0.8)
@@ -506,13 +506,13 @@ def render_plot(mode):
 
             ax2.axhline(0, color=MUTED, linewidth=0.8)
             ax2.set_xlabel("True L (mm)")
-            ax2.set_ylabel("Residual  L âˆ’ LÌ‚  (mm)")
-            ax2.set_title("Residuals  â€”  Direct inverse")
+            ax2.set_ylabel("Residual  L − L̂  (mm)")
+            ax2.set_title("Residuals  —  Direct inverse")
             ax2.set_xlim(L_MIN - L_pad, L_MAX + L_pad)
             ax2.legend(fontsize=8, facecolor=DARK, labelcolor=WHITE, framealpha=0.8)
             ax2.grid(alpha=0.15, color=BORDER)
 
-        # â”€â”€ Mode B: Natural fit + algebraic inversion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ── Mode B: Natural fit + algebraic inversion ────────────────────────
         elif mode == "natural":
             l_rec_lin  = invert_linear(Sx_mean)
             l_rec_quad = invert_quadratic(Sx_mean)
@@ -529,7 +529,7 @@ def render_plot(mode):
                 ecolor=CYAN + "55",
                 capsize=3,
                 zorder=5,
-                label="Data (Â±2Ïƒ)",
+                label="Data (±2σ)",
             )
 
             ax1.plot(Sx_fine, l_inv_lin, color=PINK, linewidth=1.8,
@@ -549,7 +549,7 @@ def render_plot(mode):
 
             ax1.set_xlabel("Landing Sx (mm)")
             ax1.set_ylabel("Draw Length L (mm)")
-            ax1.set_title("L = fâ»Â¹(Sx)  â€”  OLS natural + inversion")
+            ax1.set_title("L = f⁻¹(Sx)  —  OLS natural + inversion")
             ax1.set_xlim(Sx_MIN - Sx_pad, Sx_MAX + Sx_pad)
             ax1.set_ylim(L_MIN - L_pad, L_MAX + L_pad)
             ax1.legend(fontsize=8, facecolor=DARK, labelcolor=WHITE, framealpha=0.8)
@@ -562,13 +562,13 @@ def render_plot(mode):
 
             ax2.axhline(0, color=MUTED, linewidth=0.8)
             ax2.set_xlabel("True L (mm)")
-            ax2.set_ylabel("Residual  L âˆ’ LÌ‚  (mm)")
-            ax2.set_title("Residuals  â€”  OLS natural + inversion")
+            ax2.set_ylabel("Residual  L − L̂  (mm)")
+            ax2.set_title("Residuals  —  OLS natural + inversion")
             ax2.set_xlim(L_MIN - L_pad, L_MAX + L_pad)
             ax2.legend(fontsize=8, facecolor=DARK, labelcolor=WHITE, framealpha=0.8)
             ax2.grid(alpha=0.15, color=BORDER)
 
-        # â”€â”€ Mode C: Forward prediction, Sx = f(L) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ── Mode C: Forward prediction, Sx = f(L) ────────────────────────────
         else:
             sx_lin_fine  = np.polyval(p_lin_nat, L_fine)
             sx_quad_fine = np.polyval(p_quad_nat, L_fine)
@@ -585,7 +585,7 @@ def render_plot(mode):
                 ecolor=CYAN + "55",
                 capsize=3,
                 zorder=5,
-                label="Data (Â±2Ïƒ)",
+                label="Data (±2σ)",
             )
 
             ax1.plot(L_fine, sx_lin_fine, color=PINK, linewidth=1.8, label="Linear")
@@ -604,7 +604,7 @@ def render_plot(mode):
 
             ax1.set_xlabel("Draw Length L (mm)")
             ax1.set_ylabel("Landing Sx (mm)")
-            ax1.set_title("Sx = f(L)  â€”  Forward  (no inversion)")
+            ax1.set_title("Sx = f(L)  —  Forward  (no inversion)")
             ax1.set_xlim(L_MIN - L_pad, L_MAX + L_pad)
             ax1.set_ylim(Sx_MIN - Sx_pad, Sx_MAX + Sx_pad)
             ax1.legend(fontsize=8, facecolor=DARK, labelcolor=WHITE, framealpha=0.8)
@@ -620,8 +620,8 @@ def render_plot(mode):
 
             ax2.axhline(0, color=MUTED, linewidth=0.8)
             ax2.set_xlabel("True L (mm)")
-            ax2.set_ylabel("Residual  Sx âˆ’ SxÌ‚  (mm)")
-            ax2.set_title("Residuals  â€”  Forward Sx")
+            ax2.set_ylabel("Residual  Sx − Sx̂  (mm)")
+            ax2.set_title("Residuals  —  Forward Sx")
             ax2.set_xlim(L_MIN - L_pad, L_MAX + L_pad)
             ax2.legend(fontsize=8, facecolor=DARK, labelcolor=WHITE, framealpha=0.8)
             ax2.grid(alpha=0.15, color=BORDER)
@@ -636,7 +636,7 @@ def render_plot(mode):
         plt.show()
         plt.close(fig)
 
-# â”€â”€ Layout helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Layout helpers ───────────────────────────────────────────────────────────
 quick_row = widgets.HBox(
     [quick_label] + quick_btns,
     layout=widgets.Layout(margin="6px 0 0 0", flex_wrap="wrap"),
@@ -682,7 +682,7 @@ main_ui = widgets.VBox(
 
 main_ui.add_class("m2-dark-ui")
 
-# â”€â”€ Master refresh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Master refresh ───────────────────────────────────────────────────────────
 def refresh(_=None):
     mode = model_toggle.value
 
