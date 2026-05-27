@@ -9,7 +9,7 @@ Quick start::
 
     from m2_launcher import M2LauncherApp
     app = M2LauncherApp()
-    app.display()
+    app.run()
 
 Individual components are also importable::
 
