@@ -4,11 +4,13 @@
 
 The **M2 Ball Launcher** is an engineering project developed at **King Mongkut's University of Technology Thonburi (KMUTT)**. It is a mechanical ball launcher that fires a projectile at a fixed angle (60°) and uses an **NE555 timer circuit** to control the trigger delay so that the ball lands at a precise horizontal distance.
 
-The software layer provides three core capabilities:
+The software is a **single-page web application** (HTML/CSS/JS) built with **OOP principles** using ES6 modules. It provides:
 
-1. **Projectile physics** — compute flight time and required trigger delay.
-2. **Draw-length regression** — map between draw length (L) and landing distance (Sx).
-3. **NE555 timer calibration** — translate a computed delay time into physical dial/knob settings on the hardware.
+1. **Delay calculator** — compute flight time, trigger delay, and NE555 dial/knob settings.
+2. **Draw-length regression** — estimate draw length (L) from landing distance (Sx) via OLS linear inversion.
+
+> [!NOTE]
+> The delay calculator applies a **+102 mm offset** to the user's Sx input before computing physics (i.e., `Sx_delay = Sx_input + 102`). The regression uses the raw Sx input directly.
 
 ---
 
@@ -16,27 +18,51 @@ The software layer provides three core capabilities:
 
 ```mermaid
 flowchart LR
-    A["User inputs\ntarget Sx (mm)"] --> B["DrawLengthRegression\n(regression.py)"]
-    B --> C["Required draw\nlength L (mm)"]
-    A --> D["PhysicsEngine\n(physics.py)"]
-    D --> E["Flight time &\ndelay time (s)"]
-    E --> F["NE555TimerModel\n(timer_model.py)"]
-    F --> G["Dial settings\n(knob1, knob2, switch)"]
+    A["User inputs\nSx (mm), RPM, φ"] --> B["PhysicsEngine.js"]
+    B --> C["Flight time &\ndelay time (s)"]
+    C --> D["NE555TimerModel.js"]
+    D --> E["Dial settings\n(knob1, knob2, switch)"]
+    A --> F["DrawLengthRegression.js"]
+    F --> G["Estimated draw\nlength L (mm)"]
+    H["M2LauncherApp.js"] -->|orchestrates| B
+    H -->|orchestrates| D
+    H -->|orchestrates| F
+```
+
+### File Structure
+
+```
+├── index.html                        ← HTML structure (no inline JS)
+├── style.css                         ← Stylesheet (light theme)
+├── js/
+│   ├── main.js                       ← Entry point (boots the app)
+│   ├── NE555TimerModel.js            ← CSV loading, regression, step lookup
+│   ├── PhysicsEngine.js              ← Projectile kinematics, delay computation
+│   ├── DrawLengthRegression.js       ← OLS linear fit, algebraic inversion
+│   └── M2LauncherApp.js              ← Orchestrator, DOM rendering
+├── Example/
+│   ├── ne555_full_dataset.csv        ← NE555 calibration data (loaded at runtime)
+│   ├── delay.py                      ← Original Python delay calculator (reference)
+│   ├── regression.py                 ← Original Python regression tool (reference)
+│   ├── ne555_calculator.html         ← Original standalone HTML calculator (reference)
+│   ├── Experiment3_Analysis_Summary_updated.csv
+│   └── Experiment3_Summary.xlsx
+└── project_context.md                ← This file
 ```
 
 ### End-to-End Pipeline
 
 | Step | Input | Module | Output |
 |------|-------|--------|--------|
-| 1 | Target landing distance Sx (mm) | `DrawLengthRegression` | Required draw length L (mm) |
-| 2 | Sx (mm), motor RPM, phase angle φ | `PhysicsEngine` | Flight time t_flight (s), delay time t_delay (s) |
-| 3 | t_delay (s) | `NE555TimerModel` | Best dial step, knob/switch decomposition |
+| 1 | Sx (mm), RPM, φ (deg) | `PhysicsEngine` | Flight time (s), delay time (s) — uses Sx + 102 mm |
+| 2 | t_delay (s) | `NE555TimerModel` | Best dial step, knob/switch decomposition |
+| 3 | Sx (mm) | `DrawLengthRegression` | Estimated draw length L (mm) — uses raw Sx |
 
 ---
 
 ## 3. Module Breakdown
 
-### 3.1 Physics Engine — [physics.py](file:///c:/Users/User/OneDrive%20-%20King%20Mongkut's%20University%20of%20Technology%20Thonburi%20(KMUTT)/stu/m2_launcher/physics.py)
+### 3.1 Physics Engine — [PhysicsEngine.js](js/PhysicsEngine.js)
 
 Handles projectile kinematics for a launcher firing at a fixed elevation angle.
 
@@ -45,10 +71,11 @@ Handles projectile kinematics for a launcher firing at a fixed elevation angle.
 | Parameter | Symbol | Default | Unit | Description |
 |-----------|--------|---------|------|-------------|
 | `sy` | Sy | 0.036 | m | Vertical offset of landing surface |
-| `launch_angle_deg` | θ | 60.0 | ° | Fixed launch angle |
+| `launchAngleDeg` | θ | 60.0 | ° | Fixed launch angle |
 | `g` | g | 9.81 | m/s² | Gravitational acceleration |
-| `arm_radius` | r | 0.06 | m | Arm radius for arcsin constant |
-| `arm_pivot` | — | 2.5 | m | Arm pivot distance |
+| `armRadius` | r | 0.06 | m | Arm radius for arcsin constant |
+| `armPivot` | — | 2.5 | m | Arm pivot distance |
+| `sxOffset` | — | 102 | mm | Offset added to Sx for delay calc |
 
 #### Core Equations
 
@@ -69,61 +96,53 @@ $$c = \arcsin\!\left(\frac{r_{arm}}{d_{pivot} - S_x}\right)$$
 $$t_{delay} = \frac{2\pi - \varphi - c}{\omega} - t_{flight}$$
 
 > [!IMPORTANT]
-> If `t_delay < 0`, one full cycle (2π/ω) is added. A hardware minimum of **0.1 s** is enforced — if still below 0.1 s after adding a cycle, a `ValueError` is raised.
+> If `t_delay < 0`, one full cycle (2π/ω) is added. A hardware minimum of **0.1 s** is enforced — if still below 0.1 s after adding a cycle, an error is thrown.
 
 #### Public API
 
 | Method | Signature | Returns |
 |--------|-----------|---------|
-| `compute_flight_time` | `(sx_m: float) → float` | Flight time in seconds |
-| `compute_delay_time` | `(sx_mm, rpm, phi_deg) → dict` | `{t_flight, t_delay_raw, t_delay, cycle_added, omega, c_const}` |
+| `computeFlightTime` | `(sxM: number) → number` | Flight time in seconds |
+| `computeDelayTime` | `(sxMm, rpm, phiDeg) → object` | `{tFlight, tDelayRaw, tDelay, cycleAdded, omega, cConst, sxUsed}` |
 
 ---
 
-### 3.2 Draw Length Regression — [regression.py](file:///c:/Users/User/OneDrive%20-%20King%20Mongkut's%20University%20of%20Technology%20Thonburi%20(KMUTT)/stu/m2_launcher/regression.py)
+### 3.2 Draw Length Regression — [DrawLengthRegression.js](js/DrawLengthRegression.js)
 
-OLS polynomial regression mapping draw length (L) to landing distance (Sx) and vice versa.
+OLS linear regression in the natural direction (L → Sx) with algebraic inversion (Sx → L).
 
-#### Calibration Data (Built-in Defaults)
+#### Calibration Data (Built-in)
 
-| Draw Length L (mm) | Mean Sx (mm) | σ Sx (mm) |
-|--------------------|-------------|-----------|
-| 105 | 1548.07 | 15.67 |
-| 110 | 1657.67 | 17.58 |
-| 115 | 1783.74 | 42.59 |
-| 120 | 1946.85 | 35.89 |
-| 125 | 2067.23 | 43.36 |
-| 130 | 2199.73 | 36.25 |
+| Draw Length L (mm) | Mean Sx (mm) |
+|--------------------|-------------|
+| 105 | 1548.07 |
+| 110 | 1657.67 |
+| 115 | 1783.74 |
+| 120 | 1946.85 |
+| 125 | 2067.23 |
+| 130 | 2199.73 |
 
-#### Regression Models
+#### Regression Model
 
-Three fitting modes are supported:
+Only the **linear** fit is used (OLS natural direction + algebraic inversion):
 
-| Mode | Direction | Description |
-|------|-----------|-------------|
-| **Natural** | L → Sx | OLS fit treating L as error-free (✓ statistically correct) |
-| **Direct inverse** | Sx → L | Convenience polyfit swapping axes |
-| **Algebraic inversion** | Sx → L (via natural) | Inverts the natural fit algebraically (recommended) |
+$$Sx = a \cdot L + b \qquad \Rightarrow \qquad L = \frac{Sx - b}{a}$$
 
-Each mode provides both **linear** and **quadratic** polynomial fits.
+> [!NOTE]
+> The algebraic inversion of the natural fit is the statistically correct approach since L (draw length) is the controlled variable and Sx (landing distance) carries measurement noise.
 
 #### Public API
 
-| Method | Direction | Degree |
-|--------|-----------|--------|
-| `predict_forward_linear` / `predict_forward_quadratic` | L → Sx | 1 / 2 |
-| `predict_direct_linear` / `predict_direct_quadratic` | Sx → L (direct) | 1 / 2 |
-| `invert_linear` / `invert_quadratic` | Sx → L (algebraic) | 1 / 2 |
-| `metrics(y_true, y_pred)` | — | RMSE & R² |
-| `equation_strings(mode)` | — | Formatted equations |
-| `mode_metrics(mode)` | — | Full metrics dict |
-
-> [!NOTE]
-> The **algebraic inversion of the natural fit** is the statistically recommended approach for Sx → L estimation, since L (draw length) is the controlled variable and Sx (landing distance) carries measurement noise.
+| Method | Signature | Returns |
+|--------|-----------|---------|
+| `predictForward` | `(L: number) → number` | Predicted landing Sx (mm) |
+| `invertLinear` | `(Sx: number) → number` | Estimated draw length L (mm) |
+| `isInRange` | `(Sx: number) → boolean` | Whether Sx is within calibrated range |
+| `equationStrings` | `() → {forward, inverse}` | Formatted equation strings |
 
 ---
 
-### 3.3 NE555 Timer Model — [timer_model.py](file:///c:/Users/User/OneDrive%20-%20King%20Mongkut's%20University%20of%20Technology%20Thonburi%20(KMUTT)/stu/m2_launcher/timer_model.py)
+### 3.3 NE555 Timer Model — [NE555TimerModel.js](js/NE555TimerModel.js)
 
 Calibration model for the NE555 timer circuit that controls the trigger delay.
 
@@ -138,17 +157,10 @@ Calibration model for the NE555 timer circuit that controls the trigger delay.
 
 #### Data Source
 
-- Loads from `data/ne555_full_dataset.csv` (bundled alongside the module).
+- Loads from `Example/ne555_full_dataset.csv` via `fetch()` at runtime.
 - Rows marked `n_readings == "PREDICTED"` are excluded from regression training.
 - Outliers with `std_s ≥ 0.1` are filtered before fitting.
-
-#### Fitting
-
-A **simple linear regression** (scikit-learn `LinearRegression`) is fitted:
-
-$$\text{mean\_output} = \text{slope} \times \text{target\_time} + \text{intercept}$$
-
-Recorded measurements are stored in a lookup dict and preferred over the regression estimate when available.
+- Falls back to hardcoded slope/intercept if CSV is unavailable.
 
 #### Dial Decomposition
 
@@ -156,7 +168,7 @@ A dial step (0.1–19.0) is decomposed into physical settings:
 
 | Field | Description |
 |-------|-------------|
-| `switch_on` | `True` if step ≥ 10.0 (toggle the +10 s switch) |
+| `switchOn` | `true` if step ≥ 10.0 (toggle the +10 s switch) |
 | `effective` | Step minus 10 if switch is on |
 | `knob2` | Integer part of effective step |
 | `knob1` | Tenths digit (0–9) |
@@ -165,22 +177,49 @@ A dial step (0.1–19.0) is decomposed into physical settings:
 
 | Method | Signature | Returns |
 |--------|-----------|---------|
-| `ne555_output` | `(step: float) → float` | Predicted output time (s) |
-| `best_step` | `(t_delay: float) → float` | Closest dial step to target delay |
-| `decompose_step` | `(step: float) → dict` | Knob/switch settings + NE555 stats |
-| `to_json` | `() → str` | Recorded lookup as JSON string |
+| `loadCSV` | `(...paths) → Promise<void>` | Load and parse CSV data |
+| `ne555Output` | `(step: number) → number` | Predicted output time (s) |
+| `bestStep` | `(tDelay: number) → number` | Closest dial step to target delay |
+| `decomposeStep` | `(step: number) → object` | Knob/switch settings + NE555 stats |
 
 ---
 
-## 4. Dependencies
+### 3.4 M2 Launcher App — [M2LauncherApp.js](js/M2LauncherApp.js)
 
-| Package | Used By | Purpose |
-|---------|---------|---------|
-| `numpy` | `regression.py`, `timer_model.py` | Array math, `polyfit`, `polyval` |
-| `pandas` | `timer_model.py` | CSV loading |
-| `scikit-learn` | `timer_model.py` | `LinearRegression` |
-| `math` (stdlib) | `physics.py` | Trig functions |
-| `json` (stdlib) | `timer_model.py` | JSON serialisation |
+Orchestrator that composes the three engine classes and renders results to the DOM.
+
+#### Responsibilities
+
+- Instantiates `NE555TimerModel`, `PhysicsEngine`, and `DrawLengthRegression`.
+- Binds input event listeners on the shared Sx/RPM/φ fields.
+- Calls `PhysicsEngine.computeDelayTime()` → `NE555TimerModel.bestStep()` → renders delay output.
+- Calls `DrawLengthRegression.invertLinear()` → renders regression output.
+
+#### Public API
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `init` | `() → Promise<void>` | Load data, bind events, initial render |
+| `update` | `() → void` | Re-run both calculators from current inputs |
+
+---
+
+## 4. Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Structure | HTML5 | Semantic page layout |
+| Styling | Vanilla CSS | Light theme matching original knob calculator |
+| Logic | ES6 JavaScript Modules | OOP classes with `import`/`export` |
+| Fonts | Google Fonts (JetBrains Mono, DM Sans) | Monospace + sans-serif typography |
+| Data | CSV (fetched at runtime) | NE555 calibration measurements |
+
+> [!IMPORTANT]
+> ES6 modules require a web server — `file://` won't work due to CORS. Run with:
+> ```
+> python -m http.server 8080
+> ```
+> Then open `http://localhost:8080`.
 
 ---
 
@@ -188,21 +227,16 @@ A dial step (0.1–19.0) is decomposed into physical settings:
 
 | File | Location | Description |
 |------|----------|-------------|
-| `ne555_full_dataset.csv` | `m2_launcher/data/` | NE555 calibration measurements (target time, mean output, std, n_readings) |
-
-> [!WARNING]
-> The CSV file is expected at `data/ne555_full_dataset.csv` relative to `timer_model.py`. If the file is missing, `NE555TimerModel.__init__` will raise `FileNotFoundError`.
+| `ne555_full_dataset.csv` | `Example/` | NE555 calibration measurements (target time, mean output, std, n_readings) |
+| `Experiment3_Analysis_Summary_updated.csv` | `Example/` | Draw-length experiment raw data |
+| `Experiment3_Summary.xlsx` | `Example/` | Draw-length experiment summary |
 
 ---
 
 ## 6. Potential Next Steps
 
-These are observations based on the current codebase — not committed work:
-
-- [ ] **GUI / Web dashboard** — A Streamlit or HTML dashboard to let users input Sx and get dial settings interactively.
-- [ ] **Unified pipeline script** — A single `main.py` that chains all three modules end-to-end.
-- [ ] **Plotting utilities** — Visualise regression fits, residuals, and NE555 calibration curves.
-- [ ] **Unit tests** — Validate physics calculations, regression accuracy, and edge cases.
-- [ ] **Configuration file** — Externalise hardware constants (launch angle, arm dimensions, NE555 thresholds) into a YAML/JSON config.
+- [ ] **Unit tests** — Validate physics calculations, regression accuracy, and edge cases (e.g. using a JS test framework).
+- [ ] **Configuration file** — Externalise hardware constants (launch angle, arm dimensions, offsets) into a JSON config.
 - [ ] **Error propagation** — Propagate σ_Sx uncertainty through the physics pipeline to report confidence intervals on t_delay.
 - [ ] **Additional calibration data** — Extend the draw-length range beyond 105–130 mm.
+- [ ] **GitHub Pages deployment** — Host the app via GitHub Pages for easy browser access.
